@@ -1,0 +1,25 @@
+name: GitHub export contract
+
+on:
+  push:
+    paths: [src/integrations/github_export.py, tests/test_github_export.py, .github/workflows/github-export.yml]
+  pull_request:
+    paths: [src/integrations/github_export.py, tests/test_github_export.py, .github/workflows/github-export.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - run: python -m pip install ruff==0.15.13 mypy==1.19.1
+      - run: ruff check --isolated --select E,F,I,W --line-length 100 src/integrations/github_export.py tests/test_github_export.py
+      - run: mypy --strict --follow-imports=silent src/integrations/github_export.py
+      - run: python -m unittest discover -s tests -p test_github_export.py -v

@@ -80,6 +80,30 @@ You need three types of batch JSON files extracted from your GitLab project. Pla
 
 #### 2a. Issue batch files (`issues_all_issues_batch_*.json`)
 
+For a GitHub project, an optional read-only exporter translates **explicit closing
+issue links** from selected merged PRs into this same schema:
+
+```bash
+gh auth status
+python -m src.integrations.github_export --repo owner/repository \
+  --pull-requests 26 42 \
+  --output data/issues/myproject/issues_all_issues_batch_1.json
+```
+
+It needs only Python and the authenticated `gh` CLI. It preserves merge dates,
+commit author dates, renamed/deleted file paths, and GitHub provenance. It fetches
+paginated commit/file responses and rejects potentially truncated lists.
+Cross-repository links are reported separately because the schema uses local IIDs.
+Unlinked PRs are recorded without inferring links from prose. No smell labels or
+discussions are generated. Continue with release registration and classification
+below; a new project still needs source versions, facts, and smell evolution.
+
+Offline contract checks:
+
+```bash
+python -m unittest discover -s tests -p test_github_export.py -v
+```
+
 Each file contains an array of issues with their metadata and related merge requests:
 
 ```json
